@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-
+use App\Models\LocationModels\Location;
+use App\Models\PatientModels\Patient;
+use App\Models\DentistModels\Dentist;
+use App\Models\Admin;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -18,9 +21,13 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'name',
-        'email',
+        'type',
+        'phone_number',
+        'location_id',
         'password',
+        'is_verified',
     ];
 
     /**
@@ -30,7 +37,7 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
+        'verification_code',
     ];
 
     /**
@@ -39,6 +46,19 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'phone_verified_at' => 'datetime',
     ];
+    public function Location(){
+        return $this->belongsTo(Location::class,'location_id');
+    }
+    public function Patient(){
+        return $this->hasOne(Patient::class,'user_id');
+    }
+    public function Dentist(){
+        return $this->hasOne(Dentist::class,'user_id');
+    }
+    public function Admin(){
+        return $this->hasOne(Admin::class,'user_id');
+    }
+    
 }
