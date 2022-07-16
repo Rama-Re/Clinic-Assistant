@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-use App\Models\DentistModels\Dentist;
 use App\Http\Controllers\DentistControllers\DentistController;
 use App\Http\Controllers\PatientControllers\PatientController;
 
@@ -59,8 +58,7 @@ class AuthController extends Controller
         //$result = auth()->user()->tokens()->delete();
 
         $response = [
-            'message' => 'Logged out',
-            'result' => $result
+            'message' => 'Logged out'
         ];
         return response($response,201);
     }
@@ -100,5 +98,37 @@ class AuthController extends Controller
             ];
             return response($response,201);
         }
+    }
+    public static function verify(Request $request) {
+        $result = $request->validate([
+            'phone_number' => 'required|string|exists:users,phone_number',
+            'is_verified' => 'required',
+        ]);
+        $user = User::where('phone_number',$result['phone_number'])->first();
+        $user->is_verified = $result['is_verified'];
+        $user->save();
+        if ($result['is_verified']) {
+            $response = [
+                'message' => 'account is verified'
+            ];
+            return response($response,201);
+        }
+        $response = [
+            'message' => 'account is not verified'
+        ];
+        return response($response,401);
+    }
+    public static function editPassword(Request $request) {
+        $result = $request->validate([
+            'phone_number' => 'required|string|exists:users,phone_number',
+            'password' => 'required|string|min:7|max:30'
+        ]);
+        $user = User::where('phone_number',$result['phone_number'])->first();
+        $user->password = bcrypt($result['password']);
+        $user->save();
+        $response = [
+            'message' => 'password is edited'
+        ];
+        return response($response,201);
     }
 }
