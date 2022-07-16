@@ -16,6 +16,8 @@ return new class extends Migration
         Schema::create('schedules', function (Blueprint $table) {
             $table->bigIncrements('schedule_id')->unique();
             $table->enum('working_day', ['Saturday', 'Sunday','Monday','Tuesday','Wednesday','Thursday','Friday']);
+            $table->time('start');
+            $table->time('end');
             $table->timestamps();
         });
     }

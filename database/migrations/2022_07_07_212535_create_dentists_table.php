@@ -16,7 +16,11 @@ return new class extends Migration
         Schema::create('dentists', function (Blueprint $table) {
             $table->bigIncrements('dentist_id')->unique();
             $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('user_id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->string('location');
+            $table->unsignedBigInteger('city_id');
+            $table->foreign('city_id')->references('city_id')->on('cities');
+            $table->timestamp('work_starting_date');
             $table->timestamps();
         });
     }

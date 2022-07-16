@@ -16,10 +16,12 @@ return new class extends Migration
         Schema::create('patients', function (Blueprint $table) {
             $table->bigIncrements('patient_id')->unique();
             $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('user_id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->string('location');
+            $table->unsignedBigInteger('city_id');
+            $table->foreign('city_id')->references('city_id')->on('cities');
             $table->timestamp('bearth_date')->nullable();
             $table->timestamps();
-
         });
     }
 

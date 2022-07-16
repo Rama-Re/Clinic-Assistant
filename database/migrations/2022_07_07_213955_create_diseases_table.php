@@ -17,6 +17,7 @@ return new class extends Migration
             $table->bigIncrements('disease_id')->unique();
             $table->string('disease_name');
             $table->timestamps();
+
         });
     }
 

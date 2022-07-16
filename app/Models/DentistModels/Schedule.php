@@ -17,7 +17,7 @@ class Schedule extends Model
 
     protected $primaryKey = 'schedule_id';
     
-    protected $time = ['start','end'];
+    protected $time = ['start','end']; 
 
     public function Dentist(){
         return $this->belongsTo(Dentist::class,'dentist_id');

@@ -37,7 +37,6 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'verification_code',
     ];
 
     /**
@@ -48,9 +47,7 @@ class User extends Authenticatable
     protected $casts = [
         'phone_verified_at' => 'datetime',
     ];
-    public function Location(){
-        return $this->belongsTo(Location::class,'location_id');
-    }
+    
     public function Patient(){
         return $this->hasOne(Patient::class,'user_id');
     }

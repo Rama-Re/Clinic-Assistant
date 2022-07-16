@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\GeneralTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\LocationModels\City;
+
 
 class CityController extends Controller
 {
@@ -31,8 +33,11 @@ class CityController extends Controller
     }
 
     public static function index(){
-        $generalTrait = new GeneralTrait;
-        return $generalTrait->returnData("cities",City::get());
+        $response = [
+            'cities' => City::get(),
+            'message' => 'Success'
+        ];
+        return response($response,201);
     }
 
     /*
@@ -45,7 +50,7 @@ class CityController extends Controller
     {
         $generalTrait = new GeneralTrait;
 
-        if (empty(DB::table('cities')->count())) {
+        if (empty(City::count())) {
             $cities = self::get_all();
 
             foreach ($cities as $key => $value) {
@@ -53,11 +58,19 @@ class CityController extends Controller
                     'city_id' => $key,
                     'city_name' => $value['name'],
                 ];
-                DB::table('cities')->insert($citiesarray);
+                City::insert($citiesarray);
             }
-            return $generalTrait->returnSuccessMessage('cities added successfully');
+            $response = [
+                'message' => 'cities added successfully'
+            ];
+            return response($response,201);
         } else {
-            return $generalTrait->returnData('cities',DB::table('cities')->get(),'cities already added');
+            $response = [
+                'cities' => City::get(),
+                'message' => 'cities already added'
+            ];
+            return response($response,201);
+            //return $generalTrait->returnData('cities',DB::table('cities')->get(),'cities already added');
         }
     }
 }

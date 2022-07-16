@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\SharedModels\BookedAppointment;
 use App\Models\SharedModels\PatientRecord;
 use App\Models\PatientModels\PatientHealthInfo;
+use App\Models\LocationModels\City;
 use App\Models\User;
 class Patient extends Model
 {
@@ -15,6 +16,8 @@ class Patient extends Model
     protected $fillable = [
         'patient_id',
         'user_id',
+        'location',
+        'city_id'
     ];
 
     protected $primaryKey = 'patient_id';
@@ -23,6 +26,10 @@ class Patient extends Model
 
     public function User(){
         return $this->belongsTo(User::class,'user_id');
+    }
+
+    public function City(){
+        return $this->belongsTo(City::class,'city_id');
     }
 
     public function BookedAppointment(){
