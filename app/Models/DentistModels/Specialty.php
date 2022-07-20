@@ -16,7 +16,11 @@ class Specialty extends Model
 
     protected $primaryKey = 'specialty_id';
     
-    public function MedicalService(){
-        return $this->hasMany(MedicalService::class,'specialty_id');
+    public function SpecialtyService(){
+        return $this->hasMany(SpecialtyService::class,'specialty_id');
+    }
+
+    public function DentistSpecialty(){
+        return $this->hasMany(DentistSpecialty::class,'specialty_id');
     }
 }

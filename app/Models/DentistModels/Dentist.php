@@ -18,8 +18,8 @@ class Dentist extends Model
         'dentist_id',
         'user_id',
         'location',
-        'city_id'
-
+        'city_id',
+        
     ];
 
     protected $date = 'work_starting_date';
@@ -41,13 +41,12 @@ class Dentist extends Model
     public function PatientRecord(){
         return $this->hasMany(PatientRecord::class,'dentist_id');
     }
-
-    public function DentistService(){
-        return $this->hasMany(DentistService::class,'dentist_id');
-    }
     
     public function Schedule(){
         return $this->hasMany(Schedule::class,'dentist_id');
     }
     
+    public function DentistSpecialty(){
+        return $this->hasMany(DentistSpecialty::class,'dentist_id');
+    }
 }

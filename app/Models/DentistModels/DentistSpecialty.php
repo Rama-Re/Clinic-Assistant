@@ -4,24 +4,26 @@ namespace App\Models\DentistModels;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\DentistModels\MedicalService;
+use App\Models\DentistModels\Specialty;
 use App\Models\DentistModels\Dentist;
-class DentistService extends Model
+
+
+class DentistSpecialty extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'dservice_id',
-        'mservice_id',
-        'dentist_id',
-        'notes'
+        'dspecialty_id',
+        'specialty_id',
+        'dentist_id'
+        
     ];
 
-    protected $primaryKey = 'dservice_id';
-    
-    public function MedicalService(){
-        return $this->belongsTo(MedicalService::class,'mservice_id');
-    }
+    protected $primaryKey = 'dspecialty_id';
 
+    public function Specialty(){
+        return $this->belongsTo(Specialty::class,'specialty_id');
+    }
+    
     public function Dentist(){
         return $this->belongsTo(Dentist::class,'dentist_id');
     }

@@ -14,10 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('medical_services', function (Blueprint $table) {
-            $table->bigIncrements('mservice_id')->unique();
+            $table->bigIncrements('service_id')->unique();
             $table->string('service_name');
-            $table->unsignedBigInteger('specialty_id');
-            $table->foreign('specialty_id')->references('specialty_id')->on('specialties');
             $table->timestamps();
 
         });

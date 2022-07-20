@@ -11,18 +11,14 @@ class MedicalService extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'mservice_id',
+        'service_id',
         'service_name',
-        'specialty_id'
     ];
 
-    protected $primaryKey = 'mservice_id';
+    protected $primaryKey = 'service_id';
     
-    public function Specialty(){
-        return $this->belongsTo(Specialty::class,'specialty_id');
+    public function SpecialtyService(){
+        return $this->hasMany(SpecialtyService::class,'service_id');
     }
-
-    public function DentistService(){
-        return $this->hasMany(DentistService::class,'mservice_id');
-    }
+    
 }

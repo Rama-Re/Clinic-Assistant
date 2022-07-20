@@ -13,9 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('dentist_services', function (Blueprint $table) {
+        Schema::create('dentist_specialties', function (Blueprint $table) {
+            $table->bigIncrements('dspecialty_id')->unique();
             $table->unsignedBigInteger('dentist_id');
             $table->foreign('dentist_id')->references('dentist_id')->on('dentists');
+            $table->unsignedBigInteger('specialty_id');
+            $table->foreign('specialty_id')->references('specialty_id')->on('specialties');
+            $table->timestamps();
         });
     }
 
@@ -26,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('dentist_specialties');
     }
 };

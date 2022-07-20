@@ -40,6 +40,7 @@ class CityController extends Controller
         return response($response,201);
     }
 
+    
     /*
     public static function get_cities_names(){
         return array_column(self::$cityArray, 'name');

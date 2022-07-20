@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\DentistControllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\DentistModels\MedicalService;
 use Illuminate\Http\Request;
+use App\Models\DentistModels\SpecialtyService;
 
-class MedicalServiceController extends Controller
+class SpecialtyServiceController extends Controller
 {
     private static $serviceArray = array(
-        1 =>array('service_name'=>'Veneer'),
-        2 =>array('service_name'=>'Fillings'),
-        3 =>array('service_name'=>'Concsulation'),
-        4 =>array('service_name'=>'Preview'),
-        5 =>array('service_name'=>'Extraction'),
-        6 =>array('service_name'=>'Nerve Extraction'),
-        7 =>array('service_name'=>'Remove Braces'),
-        8 =>array('service_name'=>'Braces'),
+        1 =>array('specialty_id'=>3, 'service_id'=>2),
+        2 =>array('specialty_id'=>3, 'service_id'=>5),
+        3 =>array('specialty_id'=>3, 'service_id'=>6),
+        4 =>array('specialty_id'=>6, 'service_id'=>6),
+        5 =>array('specialty_id'=>4, 'service_id'=>2),
+        6 =>array('specialty_id'=>4, 'service_id'=>1),
+        7 =>array('specialty_id'=>5, 'service_id'=>7),
+        8 =>array('specialty_id'=>5, 'service_id'=>8),
     );
 
     public static function get_all(){
@@ -25,22 +25,23 @@ class MedicalServiceController extends Controller
 
     public static function index(){
         $response = [
-            'services' => MedicalService::get(),
+            'services' => SpecialtyService::get(),
             'message' => 'Success'
         ];
         return response($response,201);
     }
     public static function save()
     {
-        if (empty(MedicalService::count())) {
+        if (empty(SpecialtyService::count())) {
             $services = self::get_all();
 
             foreach ($services as $key => $value) {
                 $service = [
-                    'service_id' => $key,
-                    'service_name' => $value['service_name'],
+                    'sservice_id' => $key,
+                    'specialty_id' => $value['specialty_id'],
+                    'service_id' => $value['service_id'],
                 ];
-                MedicalService::insert($service);
+                SpecialtyService::insert($service);
             }
             $response = [
                 'message' => 'services added successfully'
@@ -48,7 +49,7 @@ class MedicalServiceController extends Controller
             return response($response,201);
         } else {
             $response = [
-                'specialties' => MedicalService::get(),
+                'specialties' => SpecialtyService::get(),
                 'message' => 'services already added'
             ];
             return response($response,201);
