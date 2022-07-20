@@ -53,7 +53,8 @@ class AuthController extends Controller
         }
     }
 
-    public static function logout(Request $request) {
+    public static function logout(Request $request)
+    {
         $result = $request->user()->currentAccessToken()->delete();
         //$result = auth()->user()->tokens()->delete();
 
@@ -99,13 +100,39 @@ class AuthController extends Controller
             return response($response,201);
         }
     }
-    public static function verify(Request $request) {
+
+    public static function getProfile(Request $request)
+    {
+        $user = auth()->user();
+        $user_id = $user->id;
+        if ($user->type == 'Dentist') {
+            $dentist = DentistController::getProfile($user->id);
+            $response = [
+                'profile' => compact('user','dentist'),
+            ];
+            return response($response,201);
+        }
+
+        if ($user->type == 'Patient') {
+            $patient = PatientController::getProfile($user->id);
+            $response = [
+                'profile' => compact('user','patient'),
+            ];
+            return response($response,201);
+        }
+        
+        return $dentist;
+    }
+
+    public static function verify(Request $request)
+    {
         $result = $request->validate([
             'phone_number' => 'required|string|exists:users,phone_number',
             'is_verified' => 'required',
         ]);
         $user = User::where('phone_number',$result['phone_number'])->first();
         $user->is_verified = $result['is_verified'];
+        $user->phone_verified_at = date('Y-m-d H:i:s');
         $user->save();
         if ($result['is_verified']) {
             $response = [
@@ -118,7 +145,9 @@ class AuthController extends Controller
         ];
         return response($response,401);
     }
-    public static function editPassword(Request $request) {
+
+    public static function editPassword(Request $request)
+    {
         $result = $request->validate([
             'phone_number' => 'required|string|exists:users,phone_number',
             'password' => 'required|string|min:7|max:30'

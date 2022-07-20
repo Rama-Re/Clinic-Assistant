@@ -25,7 +25,7 @@ class MedicalServiceController extends Controller
 
     public static function index(){
         $response = [
-            'services' => MedicalService::get(),
+            'services' => MedicalService::get(['service_id','service_name']),
             'message' => 'Success'
         ];
         return response($response,201);

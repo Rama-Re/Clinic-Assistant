@@ -24,7 +24,7 @@ class SpecialtyController extends Controller
 
     public static function index(){
         $response = [
-            'specialties' => Specialty::get(),
+            'specialties' => Specialty::get(['specialty_id','specialty_name']),
             'message' => 'Success'
         ];
         return response($response,201);
