@@ -5,6 +5,7 @@ namespace App\Http\Controllers\DentistControllers;
 use App\Http\Controllers\Controller;
 use App\Models\DentistModels\Specialty;
 use Illuminate\Http\Request;
+use App\Http\Controllers\DentistControllers\SpecialtyServiceController;
 
 class SpecialtyController extends Controller
 {
@@ -29,6 +30,25 @@ class SpecialtyController extends Controller
         ];
         return response($response,201);
     }
+    
+    public static function getServices (Request $request){
+        $specialties = $request->specialties;
+        $services = array();
+        $count = 0;
+        foreach ($specialties as $specialty) {
+            //return $specialty;
+            $id = Specialty::where('specialty_name',$specialty)->get('specialty_id')->first();
+            $services[$count] = SpecialtyServiceController::index($id, $specialty);
+            $count++;
+            
+        }
+        $response = [
+            'specialty_services' => $services,
+            'message' => 'Success'
+        ];
+        return response($response,201);
+    }
+
     public static function save()
     {
         if (empty(Specialty::count())) {

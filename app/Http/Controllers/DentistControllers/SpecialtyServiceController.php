@@ -23,12 +23,22 @@ class SpecialtyServiceController extends Controller
         return self::$serviceArray; 
     }
 
-    public static function index(){
+    public static function index($id, $name){
+        $services = SpecialtyService::join('medical_services', 'medical_services.service_id', '=', 'specialty_services.service_id')
+        ->where('specialty_services.specialty_id',$id->specialty_id)
+        ->get('medical_services.service_name');
+        $servicesArray = array();
+        $count = 0;
+        //return $services;
+        foreach ($services as $service) {
+            //return $service;
+            $servicesArray[$count] = $service->service_name;
+            $count++;
+        }
         $response = [
-            'services' => SpecialtyService::get(),
-            'message' => 'Success'
+            $name => $servicesArray
         ];
-        return response($response,201);
+        return $response;
     }
     public static function save()
     {

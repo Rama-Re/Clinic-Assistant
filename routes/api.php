@@ -29,5 +29,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post("/editSchedule", [DentistController::class,'editSchedule']);
     Route::get("/getProfile", [AuthController::class,'getProfile']);
     Route::get("/getSchedule", [DentistController::class,'getSchedule']);
+    // for test
+    Route::get("/getServices", [SpecialtyController::class,'getServices']);
+
 });
 

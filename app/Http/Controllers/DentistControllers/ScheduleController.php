@@ -55,14 +55,8 @@ class ScheduleController extends Controller
                 ];
                 $count++;
         }
-        //$schedule = Schedule::groupBy('working_day')->get();
-        //Schedule::select(['working_day','start','end'])->groupBy('working_day')
-        //->having('dentist_id', '=', $dentist_id)->orderBy('start')->orderBy('end')
-        //->get();where('dentist_id',$dentist_id
-        //groupBy('working_day')->where('dentist_id',)->get();
+        
         return $scheduleArray;
-    //->sortBy(function ($article) => constant('\Carbon\Carbon::' . strtoupper($article->day)))
-    //->toBase();
     }
 
     public static function edit($result,$dentist_id)
