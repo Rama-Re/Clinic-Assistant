@@ -100,7 +100,7 @@ class DentistController extends Controller
         return response($response,401);
     }
 
-    public static function editMainPrperties(Request $request)
+    public static function editMainProperties(Request $request)
     {
         $user = auth()->user();
         $user_id = $user->id;

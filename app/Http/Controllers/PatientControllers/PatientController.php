@@ -47,7 +47,7 @@ class PatientController extends Controller
         return $profile;
     }
 
-    public static function editMainPrperties(Request $request)
+    public static function editMainProperties(Request $request)
     {
         $user = auth()->user();
         $user_id = $user->id;
@@ -55,12 +55,12 @@ class PatientController extends Controller
             'location' => 'required|string',
             'city_id' => 'required|exists:cities,city_id',
         ]);
-        $dentist = DentistController::get($user_id);
-        $dentist_id = $dentist->dentist_id;
-        $dentist->location = $result['location'];
-        $dentist->city_id = $result['city_id'];
-        $dentist->save();
-        if ($dentist) {
+        $patient = PatientController::get($user_id);
+        $patient_id = $patient->patient_id;
+        $patient->location = $result['location'];
+        $patient->city_id = $result['city_id'];
+        $patient->save();
+        if ($patient) {
             $response = [
                 'message' => 'properties edited succesfully'
             ];

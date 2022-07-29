@@ -33,7 +33,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 //dentist
 Route::group(['middleware' => ['auth:sanctum','userType:Dentist']], function () {
     Route::post("/addPrperties", [DentistController::class,'addPrperties']);
-    Route::post("/dentist/editMainPrperties", [DentistController::class,'editMainPrperties']);
+    Route::post("/dentist/editMainProperties", [DentistController::class,'editMainProperties']);
     Route::post("/editSchedule", [DentistController::class,'editSchedule']);
     Route::get("/getSchedule", [DentistController::class,'getSchedule']);
     // for test
@@ -42,6 +42,6 @@ Route::group(['middleware' => ['auth:sanctum','userType:Dentist']], function () 
 
 //patient
 Route::group(['middleware' => ['auth:sanctum','userType:Patient']], function () {
-    Route::post("/patient/editMainPrperties", [PatientController::class,'editMainPrperties']);
+    Route::post("/patient/editMainProperties", [PatientController::class,'editMainProperties']);
 });
 
