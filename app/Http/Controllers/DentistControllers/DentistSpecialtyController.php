@@ -5,6 +5,7 @@ namespace App\Http\Controllers\DentistControllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\DentistModels\DentistSpecialty;
+use App\Models\DentistModels\Specialty;
 class DentistSpecialtyController extends Controller
 {
     public static function validateReq(Request $request)
@@ -57,5 +58,33 @@ class DentistSpecialtyController extends Controller
             return True;
         }
         else return False;
+    }
+
+    public static function getServices (Request $request){
+        $user = auth()->user();
+        $user_id = $user->id;
+        $dentist = DentistController::get($user_id);
+        $services = Specialty::join('dentist_specialties', 'dentist_specialties.specialty_id', '=', 'specialties.specialty_id')
+        ->join('specialty_services', 'specialty_services.specialty_id', '=', 'dentist_specialties.specialty_id')
+        ->join('medical_services', 'medical_services.service_id', '=', 'specialty_services.service_id')
+        ->where('dentist_specialties.dentist_id',$dentist->dentist_id)
+        ->get('medical_services.service_name');
+        if (!$services) {
+            $response = [
+                'message' => 'failed'
+            ];
+            return response($response,401);
+        }
+        $servicesArray = array();
+        $count = 0;
+        foreach ($services as $service) {
+            $servicesArray[$count] = $service['service_name'];
+            $count++;
+        }
+        $response = [
+            'specialty_services' => $servicesArray,
+            'message' => 'Success'
+        ];
+        return response($response,201);
     }
 }

@@ -22,7 +22,7 @@ class Patient extends Model
 
     protected $primaryKey = 'patient_id';
 
-    protected $date = 'bearth_day';
+    protected $date = 'bearth_date';
 
     public function User(){
         return $this->belongsTo(User::class,'user_id');
