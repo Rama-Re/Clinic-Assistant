@@ -19,9 +19,9 @@ return new class extends Migration
             $table->foreign('dentist_id')->references('dentist_id')->on('dentists');
             $table->unsignedBigInteger('patient_id');   
             $table->foreign('patient_id')->references('patient_id')->on('patients');
-            $table->enum('day', ['Saturday', 'Sunday','Monday','Tuesday','Wednesday','Thursday','Friday']);
+            //$table->enum('day', ['Saturday', 'Sunday','Monday','Tuesday','Wednesday','Thursday','Friday']);
             $table->timestamp('appointment_date');
-            $table->time('appointment_time');
+            $table->unsignedBigInteger('duration');
             $table->boolean('Done')->default(false);
             $table->timestamps();
         });

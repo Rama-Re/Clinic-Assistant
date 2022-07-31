@@ -9,7 +9,7 @@ use App\Http\Controllers\PatientControllers\PatientController;
 use App\Http\Controllers\DentistControllers\SpecialtyController;
 use App\Http\Controllers\DentistControllers\MedicalServiceController;
 use App\Http\Controllers\DentistControllers\DentistSpecialtyController;
-
+use App\Http\Controllers\SharedControllers\BookedAppointmentController;
 // without auth
 Route::get("/cities", [CityController::class,'index']);
 Route::get("/specialties", [SpecialtyController::class,'index']);
@@ -36,12 +36,19 @@ Route::group(['middleware' => ['auth:sanctum','userType:Dentist']], function () 
     Route::post("/dentist/editMainProperties", [DentistController::class,'editMainProperties']);
     Route::post("/editSchedule", [DentistController::class,'editSchedule']);
     Route::get("/getSchedule", [DentistController::class,'getSchedule']);
-    // for test
     Route::get("/getServices", [DentistSpecialtyController::class,'getServices']);
+    Route::get("/getNextAppointment", [BookedAppointmentController::class,'getNextAppointment']);
+    Route::get("/getPrevAppointment", [BookedAppointmentController::class,'getPrevAppointment']);
+    Route::post("/setAppointmentSuccess", [BookedAppointmentController::class,'setAppointmentSuccess']);
+
 });
 
 //patient
 Route::group(['middleware' => ['auth:sanctum','userType:Patient']], function () {
     Route::post("/patient/editMainProperties", [PatientController::class,'editMainProperties']);
+    Route::post("/canBook", [BookedAppointmentController::class,'canBook']);
+    Route::post("/addAppointment", [BookedAppointmentController::class,'addAppointment']);
+    Route::post("/editAppointment", [BookedAppointmentController::class,'editAppointment']);
+    Route::delete("/deleteAppointment", [BookedAppointmentController::class,'deleteAppointment']);
 });
 

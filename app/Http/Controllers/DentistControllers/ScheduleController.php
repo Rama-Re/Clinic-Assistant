@@ -5,6 +5,9 @@ namespace App\Http\Controllers\DentistControllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\DentistModels\Schedule;
+use Carbon\Carbon;
+
+
 class ScheduleController extends Controller
 {
     public static function validateReq(Request $request)
@@ -79,5 +82,34 @@ class ScheduleController extends Controller
             return True;
         }
         else return False;
+    }
+    public static function checkWorkTime($result,$dentist_id){
+        //return $result['appointment_date']->format('H:i:s');
+        $start = Carbon::createFromFormat('Y-m-d H:i:s', $result['appointment_date']);
+        $end = Carbon::createFromFormat('Y-m-d H:i:s', $result['appointment_date'])
+        ->addMinutes($result['duration']);
+        $start2 = Carbon::createFromFormat('H:i:s', $start->format('H:i:s'));
+        $end2 = Carbon::createFromFormat('H:i:s', $end->format('H:i:s'));
+        //return $start2;
+        $day = Carbon::createFromFormat('Y-m-d H:i:s', $result['appointment_date'])->format('l');
+        //return $end;
+        //test
+        $workTimes = Schedule::where('dentist_id',$result['dentist_id'])
+        ->where('working_day',$day)->get(['start','end']);
+        foreach ($workTimes as $time) {
+            $startWork = Carbon::createFromFormat('H:i:s', $time['start']);
+            //return $startWork;
+            $endWork = Carbon::createFromFormat('H:i:s', $time['end']);
+            if ($start2->gte($startWork) & $end2->lte($endWork)) {
+                return [
+                    'can' => True,
+                    'message' => 'success'
+                ];
+            }
+        }
+        return [
+            'can' => False,
+            'message' => 'this is not working time for the dentist'
+        ];
     }
 }

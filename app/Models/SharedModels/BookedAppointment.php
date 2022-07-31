@@ -15,15 +15,16 @@ class BookedAppointment extends Model
         'appointment_id',
         'patient_id',
         'dentist_id',
-        'day',
+        'duration',
+        //'day',
         'Done'
-    ];
+    ]; 
 
     protected $primaryKey = 'appointment_id';
 
-    protected $date = 'appointment_date';
+    protected $dates = ['appointment_date'];
 
-    protected $time = 'appointment_time';
+    //protected $time = 'appointment_time';
 
     public function Patient(){
         return $this->belongsTo(Patient::class,'patient_id');

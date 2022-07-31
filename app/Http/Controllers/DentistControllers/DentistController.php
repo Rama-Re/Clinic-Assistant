@@ -46,6 +46,7 @@ class DentistController extends Controller
         $dentist_id = $dentist->dentist_id;
         $dentist_specialties = DentistSpecialtyController::getSpecialties($dentist_id);
         $profile = [
+            'dentist_id' => $dentist_id,
             'location' => $dentist->location,
             'city_id' => $dentist->city_id,
             'work_starting_date' => $dentist->work_starting_date,
@@ -54,6 +55,7 @@ class DentistController extends Controller
 
         return $profile;
     }
+    
     public static function getSchedule(Request $request)
     {
         $user = auth()->user();
@@ -72,6 +74,13 @@ class DentistController extends Controller
             'message' => 'something went wrong through gitting schedule'
         ];
         return response($response,401);
+    }
+
+    public static function getDentistByToken(Request $request) {
+        $user = auth()->user();
+        $user_id = $user->id;
+        $dentist = DentistController::get($user_id);
+        return $dentist;
     }
 
     public static function addPrperties(Request $request)
