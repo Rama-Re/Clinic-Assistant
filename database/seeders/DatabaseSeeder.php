@@ -18,7 +18,8 @@ class DatabaseSeeder extends Seeder
             CitySeeder::class,
             ServiceSeeder::class,
             SpecialtySeeder::class,
-            SpecialtyServiceSeeder::class
+            SpecialtyServiceSeeder::class,
+            DiseaseSeeder::class
         ]);
     }
 }

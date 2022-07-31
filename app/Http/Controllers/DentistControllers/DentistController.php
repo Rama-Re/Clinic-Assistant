@@ -85,9 +85,7 @@ class DentistController extends Controller
 
     public static function addPrperties(Request $request)
     {
-        $user = auth()->user();
-        $user_id = $user->id;
-        $dentist_id = DentistController::get($user_id)->dentist_id;
+        $dentist_id = $request->dentist_id;
         $result = DentistSpecialtyController::validateReq($request);
         $result2 = ScheduleController::validateReq($request);
         if (DentistSpecialtyController::save($result,$dentist_id)) {

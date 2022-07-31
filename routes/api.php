@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LocationControllers\CityController;
 use App\Http\Controllers\DentistControllers\DentistController;
 use App\Http\Controllers\PatientControllers\PatientController;
+use App\Http\Controllers\PatientControllers\PatientHealthInfoController;
 use App\Http\Controllers\DentistControllers\SpecialtyController;
 use App\Http\Controllers\DentistControllers\MedicalServiceController;
 use App\Http\Controllers\DentistControllers\DentistSpecialtyController;
@@ -16,6 +17,7 @@ Route::get("/specialties", [SpecialtyController::class,'index']);
 Route::get("/medical_services", [MedicalServiceController::class,'index']);
 
 Route::post("/register", [AuthController::class,'register']);
+Route::post("/addPrperties", [DentistController::class,'addPrperties']);
 Route::post("/verify", [AuthController::class,'verify']);
 
 // need verification
@@ -32,7 +34,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 //dentist
 Route::group(['middleware' => ['auth:sanctum','userType:Dentist']], function () {
-    Route::post("/addPrperties", [DentistController::class,'addPrperties']);
     Route::post("/dentist/editMainProperties", [DentistController::class,'editMainProperties']);
     Route::post("/editSchedule", [DentistController::class,'editSchedule']);
     Route::get("/getSchedule", [DentistController::class,'getSchedule']);
@@ -40,7 +41,8 @@ Route::group(['middleware' => ['auth:sanctum','userType:Dentist']], function () 
     Route::get("/getNextAppointment", [BookedAppointmentController::class,'getNextAppointment']);
     Route::get("/getPrevAppointment", [BookedAppointmentController::class,'getPrevAppointment']);
     Route::post("/setAppointmentSuccess", [BookedAppointmentController::class,'setAppointmentSuccess']);
-
+    Route::post("/getAppointmentInfo", [BookedAppointmentController::class,'getAppointmentInfo']);
+    Route::post("/getAppointmentsAtDate", [BookedAppointmentController::class,'getAppointmentsAtDate']);
 });
 
 //patient
@@ -50,5 +52,7 @@ Route::group(['middleware' => ['auth:sanctum','userType:Patient']], function () 
     Route::post("/addAppointment", [BookedAppointmentController::class,'addAppointment']);
     Route::post("/editAppointment", [BookedAppointmentController::class,'editAppointment']);
     Route::delete("/deleteAppointment", [BookedAppointmentController::class,'deleteAppointment']);
+    Route::get("/checkForAnotherAppointment", [BookedAppointmentController::class,'checkForAnotherAppointment']);
+    Route::post("/addHealthInfo", [PatientHealthInfoController::class,'addHealthInfo']);
 });
 

@@ -5,11 +5,11 @@ namespace App\Http\Controllers\PatientControllers;
 use App\Http\Controllers\Controller;
 use App\Models\PatientModels\Patient;
 use Illuminate\Http\Request;
+use App\Http\Controllers\PatientControllers\PatientHealthInfoController;
 
 class PatientController extends Controller
 {
-    public static function validateReq(Request $request)
-    {
+    public static function validateReq(Request $request) {
         $result = $request->validate([
             'location' => 'required|string',
             'city_id' => 'required|exists:cities,city_id',
@@ -19,8 +19,8 @@ class PatientController extends Controller
         return $result;
 
     }
-    public static function save($result,$user_id)
-    {
+
+    public static function save($result,$user_id) {
         $patient = new Patient;
         $patient->user_id = $user_id;
         $patient->location = $result['location'];
@@ -30,12 +30,13 @@ class PatientController extends Controller
 
         return $patient;
     }
+
     public static function get($user_id) {
         $patient = Patient::where('user_id',$user_id)->first();
         return $patient;
     }
-    public static function getProfile($user_id)
-    {
+
+    public static function getProfile($user_id){
         $patient = PatientController::get($user_id);
         $patient_id = $patient->dentist_id;
         $profile = [
@@ -55,8 +56,7 @@ class PatientController extends Controller
         return $patient;
     }
 
-    public static function editMainProperties(Request $request)
-    {
+    public static function editMainProperties(Request $request) {
         $result = $request->validate([
             'location' => 'required|string',
             'city_id' => 'required|exists:cities,city_id',

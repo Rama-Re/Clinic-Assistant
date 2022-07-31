@@ -7,17 +7,25 @@ use Illuminate\Support\Facades\Validator;
 
 class MyValidator extends Controller
 {
-    public static function validation($data, $rules){
+    public static function make($data, $rules){
         try {
             $validator = Validator::make($data, $rules);
             //Send failed response if request is not valid
             if ($validator->fails()) {
-                $code = GeneralTrait::returnCodeAccordingToInput($validator);
-                return GeneralTrait::returnValidationError($validator,$code);
+                return [
+                    'status' => false,
+                    'message' => $validator->errors()->first()
+                ];
             }
-            else return GeneralTrait::returnSuccessMessage('success');
+            else return [
+                'status' => true,
+                'data' => $data
+            ];
         } catch (\Exception $e) {
-            return GeneralTrait::returnError($e->getCode(), $e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
         }
     }
 }
