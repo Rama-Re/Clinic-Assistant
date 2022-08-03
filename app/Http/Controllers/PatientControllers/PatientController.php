@@ -4,6 +4,7 @@ namespace App\Http\Controllers\PatientControllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\PatientModels\Patient;
+use App\Models\LocationModels\City;
 use Illuminate\Http\Request;
 use App\Http\Controllers\PatientControllers\PatientHealthInfoController;
 
@@ -37,12 +38,15 @@ class PatientController extends Controller
     }
 
     public static function getProfile($user_id){
-        $patient = PatientController::get($user_id);
-        $patient_id = $patient->dentist_id;
+        $patient_id = self::get($user_id)->patient_id;
+        $patient = City::
+        join('patients','patients.city_id','=','cities.city_id')
+        ->where('patients.patient_id',$patient_id)
+        ->get(['patients.patient_id','cities.city_name','patients.location','patients.bearth_date'])->first();
         $profile = [
             'patient_id' => $patient_id,
             'location' => $patient->location,
-            'city_id' => $patient->city_id,
+            'city_name' => $patient->city_name,
             'bearth_date' => $patient->bearth_date,
         ];
 

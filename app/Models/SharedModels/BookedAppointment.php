@@ -22,7 +22,10 @@ class BookedAppointment extends Model
 
     protected $primaryKey = 'appointment_id';
 
-    protected $dates = ['appointment_date'];
+    protected $casts = [
+        'appointment_date' => 'datetime',
+    ];
+    //protected $dates = ['appointment_date'];
 
     //protected $time = 'appointment_time';
 

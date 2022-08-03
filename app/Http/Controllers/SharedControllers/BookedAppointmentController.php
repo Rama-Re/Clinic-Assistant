@@ -8,6 +8,8 @@ use App\Http\Controllers\PatientControllers\PatientController;
 use App\Http\Controllers\PatientControllers\PatientHealthInfoController;
 use App\Models\SharedModels\BookedAppointment;
 use App\Models\SharedModels\PatientRecord;
+use App\Models\PatientModels\Patient;
+use App\Models\User;
 use App\Http\Controllers\DentistControllers\ScheduleController;
 use App\Http\Controllers\DentistControllers\DentistController;
 use App\Http\Controllers\MyValidator;
@@ -36,9 +38,11 @@ class BookedAppointmentController extends Controller
 
     //test
     public static function getAppointmentInfo(Request $request) {
-        $appointment = BookedAppointment::where('appointment_id',$request->appointment_id)
-        //->whereDate('booked_appointments.appointment_date', '=', date('Y-m-d'))
-        ->get(['appointment_id','patient_id','dentist_id','appointment_date','duration','Done'])->first();
+        $appointment = User::
+        join('patients','patients.user_id','=','users.id')
+        ->join('booked_appointments','booked_appointments.patient_id','=','patients.patient_id')
+        ->where('booked_appointments.appointment_id',$request->appointment_id)
+        ->get(['booked_appointments.appointment_id','booked_appointments.patient_id','users.name','booked_appointments.dentist_id','booked_appointments.appointment_date','booked_appointments.duration','booked_appointments.Done'])->first();
         $records = PatientRecordController::getPatientRecord($appointment->patient_id,$appointment->dentist_id);
         $healthInfo = PatientHealthInfoController::getHealthInfo($appointment->patient_id);
         $response = [
@@ -66,11 +70,11 @@ class BookedAppointmentController extends Controller
         ];
         return response($response,201);
     }
-
+    //delete commint
     public static function addAppointment(Request $request) {
         $result = BookedAppointmentController::validateReq($request);
         $patient_id = PatientController::getPatientByToken($request)->patient_id;
-        if (!BookedAppointmentController::isExist($request,$patient_id)) {
+        //if (!BookedAppointmentController::isExist($request,$patient_id)) {
             $bookedAppointment = new BookedAppointment;
             $bookedAppointment->dentist_id = $result['dentist_id'];
             $bookedAppointment->patient_id = $patient_id;
@@ -84,7 +88,7 @@ class BookedAppointmentController extends Controller
 
             ];
             return response($response,201);
-        }
+        //}
         $response = [
             'message' => 'you have already booked appointment'
         ];
@@ -132,13 +136,18 @@ class BookedAppointmentController extends Controller
     }
 
     public static function getAppointmentsAtDate(Request $request) {
-        $dentist_id = DentistController::getDentistByToken($request)->dentist_id;
-        $appointments = BookedAppointment::where('dentist_id',$dentist_id)
-        ->where('appointment_date','>=',Carbon::createFromFormat('Y-m-d', $request->date))
-        ->where('appointment_date','<',Carbon::createFromFormat('Y-m-d', $request->date)->addDay(1))
-        //->where('appointment_date','>=',Carbon::createFromFormat('Y-m-d H:i', '2022-07-31 08:00'))
-        ->where('Done',False)->get(['appointment_id','patient_id','appointment_date','duration']);
-        //return $appointments;
+        $dentist = DentistController::getDentistByToken($request);
+        $dentist_id = $dentist->dentist_id;
+        //$name = User::where('type','Patient')->where()
+        //$appointments = BookedAppointment::
+        $appointments = User::
+        join('patients','patients.user_id','=','users.id')
+        ->join('booked_appointments','booked_appointments.patient_id','=','patients.patient_id')
+        ->where('booked_appointments.dentist_id',$dentist_id)
+        ->where('booked_appointments.appointment_date','>=',Carbon::createFromFormat('Y-m-d H:s:i', (($request->date).' 00:00:00')))
+        ->where('booked_appointments.appointment_date','<',Carbon::createFromFormat('Y-m-d H:s:i', (($request->date).' 00:00:00'))->addDay(1))
+        ->where('booked_appointments.Done',False)->orderBy('booked_appointments.appointment_date')
+        ->get(['booked_appointments.appointment_id','booked_appointments.patient_id','users.name','booked_appointments.appointment_date','booked_appointments.duration']);
         $response = [
             'appointments' => $appointments,
             'message' => 'success'
@@ -147,12 +156,16 @@ class BookedAppointmentController extends Controller
     }
 
     public static function getNextAppointment(Request $request) {
-        $dentist_id = DentistController::getDentistByToken($request)->dentist_id;
-        $now = Carbon::now();
-        $appointments = BookedAppointment::where('dentist_id',$dentist_id)
-        ->where('appointment_date','>=',Carbon::now())
-        //->where('appointment_date','>=',Carbon::createFromFormat('Y-m-d H:i', '2022-07-31 08:00'))
-        ->where('Done',False)->get(['appointment_id','patient_id','appointment_date','duration']);
+        $dentist = DentistController::getDentistByToken($request);
+        $dentist_id = $dentist->dentist_id;
+        $now = Carbon::now()->addHour(3);
+        $appointments = User::
+        join('patients','patients.user_id','=','users.id')
+        ->join('booked_appointments','booked_appointments.patient_id','=','patients.patient_id')
+        ->where('booked_appointments.dentist_id',$dentist_id)
+        ->where('booked_appointments.appointment_date','>=',$now)
+        ->orderBy('booked_appointments.appointment_date')
+        ->get(['booked_appointments.appointment_id','booked_appointments.patient_id','users.name','booked_appointments.appointment_date','booked_appointments.duration','booked_appointments.Done']);
         $response = [
             'appointments' => $appointments,
             'message' => 'success'
@@ -188,15 +201,16 @@ class BookedAppointmentController extends Controller
     }
 
     public static function getPrevAppointment(Request $request) {
-        $dentist_id = DentistController::getDentistByToken($request)->dentist_id;
-        //$now = Carbon::now();
-        $now = date('Y-m-d H:i:s');
-        //return $now;
-        //$now->setTimezone('Asia/Damascus');
-        //return $now;
-        $appointments = BookedAppointment::where('dentist_id',$dentist_id)
-        ->where('appointment_date','<',$now)
-        ->get(['appointment_id','patient_id','appointment_date','duration','Done']);
+        $dentist = DentistController::getDentistByToken($request);
+        $dentist_id = $dentist->dentist_id;
+        $now = Carbon::now()->addHour(3);
+        $appointments = User::
+        join('patients','patients.user_id','=','users.id')
+        ->join('booked_appointments','booked_appointments.patient_id','=','patients.patient_id')
+        ->where('booked_appointments.dentist_id',$dentist_id)
+        ->where('booked_appointments.appointment_date','<',$now)
+        ->orderBy('booked_appointments.appointment_date')
+        ->get(['booked_appointments.appointment_id','booked_appointments.patient_id','users.name','booked_appointments.appointment_date','booked_appointments.duration','booked_appointments.Done']);
         $response = [
             'appointments' => $appointments,
             'message' => 'success'

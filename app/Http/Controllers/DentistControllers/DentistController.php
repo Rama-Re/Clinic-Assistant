@@ -4,6 +4,8 @@ namespace App\Http\Controllers\DentistControllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\DentistModels\Dentist;
+use App\Models\User;
+use App\Models\LocationModels\City;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Http\Controllers\DentistControllers\ScheduleController;
@@ -42,13 +44,16 @@ class DentistController extends Controller
 
     public static function getProfile($user_id)
     {
-        $dentist = DentistController::get($user_id);
-        $dentist_id = $dentist->dentist_id;
+        $dentist_id = self::get($user_id)->dentist_id;
+        $dentist = City::
+        join('dentists','dentists.city_id','=','cities.city_id')
+        ->where('dentists.dentist_id',$dentist_id)
+        ->get(['cities.city_name','dentists.dentist_id','dentists.location','dentists.work_starting_date'])->first();
         $dentist_specialties = DentistSpecialtyController::getSpecialties($dentist_id);
         $profile = [
-            'dentist_id' => $dentist_id,
+            'dentist_id' => $dentist->dentist_id,
             'location' => $dentist->location,
-            'city_id' => $dentist->city_id,
+            'city_name' => $dentist->city_name,
             'work_starting_date' => $dentist->work_starting_date,
             'dentist_specialties' => $dentist_specialties
         ];
