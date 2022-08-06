@@ -54,5 +54,8 @@ Route::group(['middleware' => ['auth:sanctum','userType:Patient']], function () 
     Route::delete("/deleteAppointment", [BookedAppointmentController::class,'deleteAppointment']);
     Route::get("/checkForAnotherAppointment", [BookedAppointmentController::class,'checkForAnotherAppointment']);
     Route::post("/addHealthInfo", [PatientHealthInfoController::class,'addHealthInfo']);
+    //test
+    Route::post("/getNextPatientAppointment", [BookedAppointmentController::class,'getNextPatientAppointment']);
+    Route::post("/getAllBySpecialty", [DentistController::class,'getAllBySpecialty']);
 });
 

@@ -9,7 +9,9 @@ use App\Http\Controllers\PatientControllers\PatientHealthInfoController;
 use App\Models\SharedModels\BookedAppointment;
 use App\Models\SharedModels\PatientRecord;
 use App\Models\PatientModels\Patient;
+use App\Models\LocationModels\City;
 use App\Models\User;
+use App\Models\DentistModels\Dentist;
 use App\Http\Controllers\DentistControllers\ScheduleController;
 use App\Http\Controllers\DentistControllers\DentistController;
 use App\Http\Controllers\MyValidator;
@@ -18,8 +20,7 @@ use Carbon\Carbon;
 
 class BookedAppointmentController extends Controller
 {
-    public static function validateReq(Request $request)
-    {
+    public static function validateReq(Request $request) {
         $result = $request->validate([
             'dentist_id'=> 'required|exists:dentists,dentist_id',
             'appointment_date' => 'required|date',
@@ -36,7 +37,7 @@ class BookedAppointmentController extends Controller
         return $result;
     }
 
-    //test
+    
     public static function getAppointmentInfo(Request $request) {
         $appointment = User::
         join('patients','patients.user_id','=','users.id')
@@ -49,6 +50,31 @@ class BookedAppointmentController extends Controller
             'appointment' => $appointment,
             'records' => $records,
             'healthInfo' => $healthInfo,
+        ];
+        return response($response,201);
+    }
+
+    //test
+    public static function getNextPatientAppointment(Request $request) {
+        $patient = PatientController::getPatientByToken($request);
+        $dentist = Dentist::where('dentist_id',$request->dentist_id)->get(['user_id','city_id','location'])->first();
+        $name = User::where('id',$dentist->user_id)->get('name')->first()->name;
+        $city_name = City::where('city_id',$dentist->city_id)->get('city_name')->first()->city_name;
+        $patient_id = $patient->patient_id;
+        $now = Carbon::now()->addHour(3);
+        $appointment = BookedAppointment::
+        where('booked_appointments.patient_id',$patient_id)
+        ->where('booked_appointments.dentist_id',$request->dentist_id)
+        ->where('booked_appointments.appointment_date','>=',$now)
+        ->where('booked_appointments.Done',False)
+        ->orderBy('booked_appointments.appointment_date')
+        ->get(['booked_appointments.appointment_id','booked_appointments.appointment_date','booked_appointments.duration','booked_appointments.Done'])->first();
+        $response = [
+            'dentist_name' => $name,
+            'city_name' => $city_name,
+            'location' => $dentist->location,
+            'appointment' => $appointment,
+            'message' => 'success'
         ];
         return response($response,201);
     }
@@ -70,7 +96,7 @@ class BookedAppointmentController extends Controller
         ];
         return response($response,201);
     }
-    //delete commint
+
     public static function addAppointment(Request $request) {
         $result = BookedAppointmentController::validateReq($request);
         $patient_id = PatientController::getPatientByToken($request)->patient_id;
@@ -281,5 +307,5 @@ class BookedAppointmentController extends Controller
         }
         return response($response,201);
     }
-
+    
 }

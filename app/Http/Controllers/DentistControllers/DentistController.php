@@ -4,6 +4,7 @@ namespace App\Http\Controllers\DentistControllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\DentistModels\Dentist;
+use App\Models\DentistModels\Specialty;
 use App\Models\User;
 use App\Models\LocationModels\City;
 use Illuminate\Http\Request;
@@ -12,8 +13,7 @@ use App\Http\Controllers\DentistControllers\ScheduleController;
 use App\Http\Controllers\DentistControllers\DentistSpecialtyController;
 class DentistController extends Controller
 {
-    public static function validateReq(Request $request)
-    {
+    public static function validateReq(Request $request){
         $result = $request->validate([
             'location' => 'required|string',
             'city_id' => 'required|exists:cities,city_id',
@@ -35,6 +35,29 @@ class DentistController extends Controller
 
         return $dentist;
     }
+
+    //test
+    public static function getAllBySpecialty(Request $request)
+    {
+        $name = $request->specialty_name;
+        $specialty_id = Specialty::where('specialty_name',$name)->get('specialty_id')->first();
+        if (!$specialty_id) {
+            $response = [
+                'message' => 'this specialty isn\'t exist'
+            ];
+            return response($response,401);
+        }
+        $dentists = User::join('dentists','dentists.user_id','=','users.id')
+        ->join('dentist_specialties', 'dentist_specialties.dentist_id','=','dentists.dentist_id')
+        ->join('cities','cities.city_id','=','dentists.city_id')
+        ->where('dentist_specialties.specialty_id',$specialty_id->specialty_id)
+        ->get(['dentists.dentist_id','users.name','cities.city_name','dentists.location','dentists.work_starting_date']);
+        $response = [
+            'dentists' => $dentists
+        ];
+        return response($response,201);
+    }
+    
 
     public static function get($user_id)
     {
