@@ -57,5 +57,6 @@ Route::group(['middleware' => ['auth:sanctum','userType:Patient']], function () 
     //test
     Route::post("/getNextPatientAppointment", [BookedAppointmentController::class,'getNextPatientAppointment']);
     Route::post("/getAllBySpecialty", [DentistController::class,'getAllBySpecialty']);
+    Route::post("/getProfileByID", [DentistController::class,'getProfileByID']);
 });
 

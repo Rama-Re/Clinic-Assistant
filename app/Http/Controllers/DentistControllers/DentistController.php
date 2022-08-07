@@ -83,6 +83,30 @@ class DentistController extends Controller
 
         return $profile;
     }
+
+    public static function getProfileByID(Request $request)
+    {
+        $dentist = City::
+        join('dentists','dentists.city_id','=','cities.city_id')
+        ->where('dentists.dentist_id',$request->dentist_id)
+        ->get(['cities.city_name','dentists.dentist_id','dentists.location','dentists.work_starting_date'])->first();
+        $dentist_specialties = DentistSpecialtyController::getSpecialties($request->dentist_id);
+        $user = User::
+        join('dentists','dentists.user_id','=','users.id')
+        ->where('dentists.dentist_id',$request->dentist_id)
+        ->get(['users.name','users.phone_number'])->first();
+        $profile = [
+            //'dentist_id' => $dentist->dentist_id,
+            'name' => $user->name,
+            'phone_number' => $user->phone_number,
+            'location' => $dentist->location,
+            'city_name' => $dentist->city_name,
+            'work_starting_date' => $dentist->work_starting_date,
+            'dentist_specialties' => $dentist_specialties
+        ];
+
+        return $profile;
+    }
     
     public static function getSchedule(Request $request)
     {

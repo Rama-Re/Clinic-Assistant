@@ -37,7 +37,6 @@ class BookedAppointmentController extends Controller
         return $result;
     }
 
-    
     public static function getAppointmentInfo(Request $request) {
         $appointment = User::
         join('patients','patients.user_id','=','users.id')
@@ -57,18 +56,25 @@ class BookedAppointmentController extends Controller
     //test
     public static function getNextPatientAppointment(Request $request) {
         $patient = PatientController::getPatientByToken($request);
-        $dentist = Dentist::where('dentist_id',$request->dentist_id)->get(['user_id','city_id','location'])->first();
-        $name = User::where('id',$dentist->user_id)->get('name')->first()->name;
-        $city_name = City::where('city_id',$dentist->city_id)->get('city_name')->first()->city_name;
         $patient_id = $patient->patient_id;
         $now = Carbon::now()->addHour(3);
-        $appointment = BookedAppointment::
-        where('booked_appointments.patient_id',$patient_id)
-        ->where('booked_appointments.dentist_id',$request->dentist_id)
+        $appointment = User::join('dentists','dentists.user_id','=','users.id')
+        ->join('booked_appointments','booked_appointments.dentist_id','=','dentists.dentist_id')
+        ->where('booked_appointments.patient_id',$patient_id)
         ->where('booked_appointments.appointment_date','>=',$now)
         ->where('booked_appointments.Done',False)
         ->orderBy('booked_appointments.appointment_date')
-        ->get(['booked_appointments.appointment_id','booked_appointments.appointment_date','booked_appointments.duration','booked_appointments.Done'])->first();
+        ->get(['booked_appointments.appointment_id','booked_appointments.dentist_id','booked_appointments.appointment_date','booked_appointments.duration','booked_appointments.Done'])->first();
+        if ($appointment == null) {
+            $response = [
+                'message' => 'this patient don\'t have any appointment'
+            ];
+            return response($response,401);
+        }
+        $dentist = Dentist::where('dentist_id',$appointment->dentist_id)->get(['user_id','city_id','location'])->first();
+        $name = User::where('id',$dentist->user_id)->get('name')->first()->name;
+        $city_name = City::where('city_id',$dentist->city_id)->get('city_name')->first()->city_name;
+        
         $response = [
             'dentist_name' => $name,
             'city_name' => $city_name,

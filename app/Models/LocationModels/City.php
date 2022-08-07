@@ -4,7 +4,8 @@ namespace App\Models\LocationModels;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\LocationModels\Location;
+use App\Models\PatientModels\Patient;
+use App\Models\DentistModels\Dentist;
 
 class City extends Model
 {
@@ -17,8 +18,11 @@ class City extends Model
     
     protected $primaryKey = 'city_id';
 
-    public function Location(){
-        return $this->hasMany(Location::class,'city_id');
+    public function Patient(){
+        return $this->hasOne(Patient::class,'user_id');
+    }
+    public function Dentist(){
+        return $this->hasOne(Dentist::class,'user_id');
     }
     
 }

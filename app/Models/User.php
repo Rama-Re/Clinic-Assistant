@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\LocationModels\Location;
 use App\Models\PatientModels\Patient;
 use App\Models\DentistModels\Dentist;
 use App\Models\Admin;
@@ -25,7 +24,6 @@ class User extends Authenticatable
         'name',
         'type',
         'phone_number',
-        'location_id',
         'password',
         'is_verified',
     ];
@@ -53,9 +51,6 @@ class User extends Authenticatable
     }
     public function Dentist(){
         return $this->hasOne(Dentist::class,'user_id');
-    }
-    public function Admin(){
-        return $this->hasOne(Admin::class,'user_id');
     }
     
 }
