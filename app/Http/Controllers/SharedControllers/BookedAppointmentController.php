@@ -23,7 +23,7 @@ class BookedAppointmentController extends Controller
     public static function validateReq(Request $request) {
         $result = $request->validate([
             'dentist_id'=> 'required|exists:dentists,dentist_id',
-            'appointment_date' => 'required|date',
+            'day' => 'numeric',
             'duration' => 'required|numeric'
         ]);
 
@@ -31,18 +31,22 @@ class BookedAppointmentController extends Controller
     }
 
     public static function isExist(Request $request,$patient_id){
-        $result = BookedAppointment::where('dentist_id',$request->dentist_id)
+        $result = BookedAppointment::
+        where('dentist_id',$request->dentist_id)
         ->where('patient_id',$patient_id)
-        ->where('Done',False)->get()->first();
+        ->where('appointment_date','>=',Carbon::now()->addHour(3))
+        //->where('Done',False)
+        ->get();
         return $result;
     }
 
     public static function getAppointmentInfo(Request $request) {
         $appointment = User::
-        join('patients','patients.user_id','=','users.id')
-        ->join('booked_appointments','booked_appointments.patient_id','=','patients.patient_id')
-        ->where('booked_appointments.appointment_id',$request->appointment_id)
-        ->get(['booked_appointments.appointment_id','booked_appointments.patient_id','users.name','booked_appointments.dentist_id','booked_appointments.appointment_date','booked_appointments.duration','booked_appointments.Done'])->first();
+            join('patients','patients.user_id','=','users.id')
+            ->join('booked_appointments','booked_appointments.patient_id','=','patients.patient_id')
+            ->join('cities','cities.city_id','=','patients.city_id')
+            ->where('booked_appointments.appointment_id',$request->appointment_id)
+            ->get(['booked_appointments.appointment_id','booked_appointments.patient_id','users.name','users.phone_number','patients.bearth_date','patients.location','cities.city_name','booked_appointments.dentist_id','booked_appointments.appointment_date','booked_appointments.duration','booked_appointments.Done'])->first();
         $records = PatientRecordController::getPatientRecord($appointment->patient_id,$appointment->dentist_id);
         $healthInfo = PatientHealthInfoController::getHealthInfo($appointment->patient_id);
         $response = [
@@ -88,41 +92,59 @@ class BookedAppointmentController extends Controller
     public static function checkForAnotherAppointment(Request $request) {
         $patient_id = PatientController::getPatientByToken($request)->patient_id;
         $appointment = BookedAppointmentController::isExist($request,$patient_id);
-        if (!$appointment) {
-            $response = [
-                'is_exist' => False,
-                'message' => 'this patient doesn\'t have any appointment'
-            ];
-            return response($response,201);
-        }
-        $response = [
-            'is_exist' => True,
-            'appointment' => $appointment,
-            'message' => 'there is another appointment for this patient'
-        ];
-        return response($response,201);
+        $result = $appointment->isEmpty();
+        if ($result) return 0;
+        return 1;
+        
+        
     }
 
     public static function addAppointment(Request $request) {
-        $result = BookedAppointmentController::validateReq($request);
+        $anchor = Carbon::today()->format('l');
+        $date = Carbon::today();
+        $dayofweek = date('w', strtotime($date));
+        $day = $request->day;
+        $add = $day - $dayofweek;
+        //if ($day <$dayofweek) $add += 7;
+        $appointment_date = date('Y-m-d', strtotime(($add).' day', strtotime($date))).' '.$request->time;
+        $result = self::validateReq($request);
+        //return $result;
         $patient_id = PatientController::getPatientByToken($request)->patient_id;
-        //if (!BookedAppointmentController::isExist($request,$patient_id)) {
-            $bookedAppointment = new BookedAppointment;
-            $bookedAppointment->dentist_id = $result['dentist_id'];
-            $bookedAppointment->patient_id = $patient_id;
-            $bookedAppointment->appointment_date = $result['appointment_date'];
-            $bookedAppointment->duration = $result['duration'];
-            $bookedAppointment->save();
-    
-            $response = [
-                'bookedAppointment' => $bookedAppointment,
-                'message' => 'success'
+        //if (!self::isExist($request,$patient_id)) {
+            if ((self::canBook($request,$appointment_date)) == 1 & self::checkForAnotherAppointment($request) == 0) {
+                $bookedAppointment = new BookedAppointment;
+                $bookedAppointment->dentist_id = $result['dentist_id'];
+                $bookedAppointment->patient_id = $patient_id;
+                $bookedAppointment->appointment_date = $appointment_date;
+                $bookedAppointment->duration = $result['duration'];
+                $bookedAppointment->save();
+                $response = [
+                    'bookedAppointment' => $bookedAppointment,
+                    'done' => true,
+                    'message' => 'تم الحجز'
+                ];
+                return response($response,201);
+            }
+            if (self::checkForAnotherAppointment($request) == 1) {
+                $response = [
+                    'done' => false,
+                    'message' => 'لقد حجزت موعد موعد بالفعل لا يمكنك الحجز مرة أخرى'
+                ];
+                return response($response,401);
 
-            ];
-            return response($response,201);
+            }
+            if (self::canBook($request,$appointment_date) == 0) {
+                $response = [
+                    'done' => false,
+                    'message' => 'نعتذر لا يوجد مواعيد متاحة بهذا الوقت'
+                ];
+                return response($response,401);
+
+            }
         //}
         $response = [
-            'message' => 'you have already booked appointment'
+            'done' => false,
+            'message' => 'لقد حجزت موعد موعد بالفعل لا يمكنك الحجز مرة أخرى'
         ];
         return response($response,401);
     }
@@ -251,9 +273,9 @@ class BookedAppointmentController extends Controller
 
     }
 
-    public static function checkBookedAppointment($result) {
-        $start = Carbon::createFromFormat('Y-m-d H:i:s', $result['appointment_date']);
-        $end = Carbon::createFromFormat('Y-m-d H:i:s', $result['appointment_date'])
+    public static function checkBookedAppointment($result,$appointment_date) {
+        $start = Carbon::createFromFormat('Y-m-d H:i:s', $appointment_date);
+        $end = Carbon::createFromFormat('Y-m-d H:i:s', $appointment_date)
         ->addMinutes($result['duration']);
         $workTimes = BookedAppointment::where('dentist_id',$result['dentist_id'])
         ->where('Done',False)->get();
@@ -266,52 +288,32 @@ class BookedAppointmentController extends Controller
             //$endWork = Carbon::createFromFormat('H:i:s', $time['end']);
             if (($start->gte($startWork) & $start->lt($endWork)) | 
                 ($end->gte($startWork) & $end->lt($endWork))) {
-                return [
-                    'can' => False,
-                    'message' => 'there is another appointment at this time'
-                ];
+                return 0;
             }
         }
-        return [
-            'can' => True,
-            'message' => 'success'
-        ];
+        return 1;
     }
 
-    public static function canBook(Request $request) {
-        $result = MyValidator::make($request->only('dentist_id','appointment_date','duration'), [
-        //$result = MyValidator::make(['dentist_id','appointment_date','duration'], [
+    public static function canBook(Request $request,$appointment_date) {
+        $result = MyValidator::make($request->only('dentist_id','day','duration'), [
             'dentist_id'=> 'required|exists:dentists,dentist_id',
-            'appointment_date' => 'required|date',
+            'day' => 'numeric',
             'duration' => 'required|numeric'
         ]);
         if (!$result['status']) {
-            $response = [
-                'can' => False,
-                'message' => $result['message']
-            ];
-            return response($response,404);
+            return 0;
         }
         $result = $result['data'];
-        /*$result = $request->validate([
-            'dentist_id'=> 'required|exists:dentists,dentist_id',
-            'appointment_date' => 'required|date',
-            'duration' => 'required|numeric'
-        ]);*/
         $patient_id = PatientController::getPatientByToken($request)->patient_id;
-        $response = ScheduleController::checkWorkTime($result,$patient_id);
-        if ($response['can']) {
-            $response2 = BookedAppointmentController::checkBookedAppointment($result,$patient_id);
-            if ($response2['can']) {
-                $response3 = [
-                    'can' => True,
-                    'message' => 'success'
-                ];
-                return response($response,201);
+        $response = ScheduleController::checkWorkTime($result,$appointment_date,$patient_id);
+        if ($response) {
+            $response2 = BookedAppointmentController::checkBookedAppointment($result,$appointment_date);
+            if ($response2) {
+                return 1;
             }
-            return response($response2,201);
+            return $response2;
         }
-        return response($response,201);
+        return $response;
     }
     
 }

@@ -83,15 +83,15 @@ class ScheduleController extends Controller
         }
         else return False;
     }
-    public static function checkWorkTime($result,$dentist_id){
+    public static function checkWorkTime($result,$appointment_date,$dentist_id){
         //return $result['appointment_date']->format('H:i:s');
-        $start = Carbon::createFromFormat('Y-m-d H:i:s', $result['appointment_date']);
-        $end = Carbon::createFromFormat('Y-m-d H:i:s', $result['appointment_date'])
+        $start = Carbon::createFromFormat('Y-m-d H:i:s', $appointment_date);
+        $end = Carbon::createFromFormat('Y-m-d H:i:s', $appointment_date)
         ->addMinutes($result['duration']);
         $start2 = Carbon::createFromFormat('H:i:s', $start->format('H:i:s'));
         $end2 = Carbon::createFromFormat('H:i:s', $end->format('H:i:s'));
         //return $start2;
-        $day = Carbon::createFromFormat('Y-m-d H:i:s', $result['appointment_date'])->format('l');
+        $day = Carbon::createFromFormat('Y-m-d H:i:s', $appointment_date)->format('l');
         //return $end;
         //test
         $workTimes = Schedule::where('dentist_id',$result['dentist_id'])
@@ -101,15 +101,9 @@ class ScheduleController extends Controller
             //return $startWork;
             $endWork = Carbon::createFromFormat('H:i:s', $time['end']);
             if ($start2->gte($startWork) & $end2->lte($endWork)) {
-                return [
-                    'can' => True,
-                    'message' => 'success'
-                ];
+                return 1;
             }
         }
-        return [
-            'can' => False,
-            'message' => 'this is not working time for the dentist'
-        ];
+        return 0;
     }
 }
